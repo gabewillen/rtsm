@@ -39,7 +39,7 @@ namespace light {
             struct Off : rtsm::State {
                 struct entry : rtsm::Behavior {
                     void execute(Light &light) {
-                        std::cout << "Light is off << std::endl;
+                        std::cout << "Light is off" << std::endl;
                     }
                 };
 
