@@ -1,5 +1,4 @@
 # DISCLAIMER
-==========
 I am not a professional C++ developer.  I taught my self using books and resources from the internet. That being said at my current employer I write software  targeted at embedded devices for automating old industrial machinery.  I welcome criticism as long as its constructive and prefereably accompanied
 with a solution.  This library is in extensive development and relies heavily on C++11 templates and SFINAE. I have only tried compiling it with GCC 8.1. Use this at your own risk.
 
