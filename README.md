@@ -18,54 +18,52 @@ namespace light {
         struct OnEvent : rtsm::Event {
         };
         struct OffEvent : rtsm::Event {
-            ];
-            struct BlinkEvent : rtsm::TimeEvent<rtsm::seconds<1>> {
+        };
+
+        struct On : rtsm::State {
+            struct entry : rtsm::Behavior {
+                void execute(Light &light) {
+                    std::cout << "Light is on" << std::endl;
+                }
             };
 
-            struct On : rtsm::State {
-                struct entry : rtsm::Behavior {
-                    void execute(Light &light) {
-                        std::cout << "Light is on" << std::endl;
-                    }
-                };
-
-                struct exit : rtsm::Behavior {
-                    void execute(Light &light) {
-                        std::cout << "Light is turning off" << std::endl;
-                    }
-                };
-            };
-
-            struct Off : rtsm::State {
-                struct entry : rtsm::Behavior {
-                    void execute(Light &light) {
-                        std::cout << "Light is off << std::endl;
-                    }
-                };
-
-                struct exit : rtsm::Behavior {
-                    void execute(Light &light) {
-                        std::cout << "Light is turning on" << std::endl;
-                    }
-                };
-            };
-
-
-            using Initial = rtsm::initial<Off>;
-
-            using OnTransition = rtsm::transition<OnEvent, Off, On>; // External transition
-            using OffTransition = rtsm::transition<OffEvent, On, Off>; // External transition
-
-
-            struct region : rtsm::Region {
-
-                using subvertex = rtsm::collection<Initial, On, Off>
-                using transition = rtsm::collection<OnTransition, OffTransition, BlinkTransition>;
+            struct exit : rtsm::Behavior {
+                void execute(Light &light) {
+                    std::cout << "Light is turning off" << std::endl;
+                }
             };
         };
 
-    }
+        struct Off : rtsm::State {
+            struct entry : rtsm::Behavior {
+                void execute(Light &light) {
+                    std::cout << "Light is off" << std::endl;
+                }
+            };
+
+            struct exit : rtsm::Behavior {
+                void execute(Light &light) {
+                    std::cout << "Light is turning on" << std::endl;
+                }
+            };
+        };
+
+
+        using Initial = rtsm::initial<Off>;
+
+        using OnTransition = rtsm::transition<OnEvent, Off, On>; // External transition
+        using OffTransition = rtsm::transition<OffEvent, On, Off>; // External transition
+
+
+        struct region : rtsm::Region {
+
+            using subvertex = rtsm::collection<Initial, On, Off>
+            using transition = rtsm::collection<OnTransition, OffTransition, BlinkTransition>;
+        };
+    };
+
 }
+
 using Light = rtsm::Object<light::Light>;
 
 int main() {
@@ -74,6 +72,7 @@ int main() {
     light.dispatch(Light::OffEvent());
     light.execute(); // Returns when the light is deactivated or when a FinalState is reached
 }
+
 ```
 
 ## Motivation
