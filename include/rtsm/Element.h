@@ -20,6 +20,9 @@ namespace rtsm {
 
     template<>
     struct Object<uml::Element::type, void> {
+
+//        typedef void classifier;
+
         template<class TARGET>
         void get() {}
 
@@ -30,6 +33,7 @@ namespace rtsm {
 
     template<class ELEMENT>
     struct Object<uml::Element::type, ELEMENT> : ELEMENT {
+
 
         template<class ...ARGS, class _ELEMENT=ELEMENT, typename std::enable_if<std::is_default_constructible<_ELEMENT>::value, bool>::type= 0>
         Object(ARGS &&...args) : _active(false) {}

@@ -70,6 +70,12 @@ namespace rtsm {
 
     };
 
+    template<class CONTEXT, class STATE, class CONTAINER, class TYPE, class CLASSIFIER>
+    struct declobject<CONTEXT, Object<uml::FinalState::type, STATE, CONTAINER>, TYPE, CLASSIFIER>
+            : declobject<CONTEXT, Object<uml::State::type, STATE, CONTAINER, void>, TYPE, CLASSIFIER> {
+
+    };
+
     template<class CONTEXT, class STATE, class ...REST, class TYPE, class CLASSIFIER>
     struct declobject<CONTEXT, Object<uml::Psuedostate::type, STATE, REST...>, TYPE, CLASSIFIER>
             : std::conditional<std::is_same<STATE, CLASSIFIER>::value, Object<uml::Psuedostate::type, STATE, REST...>, void> {

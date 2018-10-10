@@ -367,6 +367,9 @@ namespace uml {
         typedef void region;
         static const bool isSubmachineState = false;
     };
+    struct FinalState : State {
+        typedef Type<FinalState, State> type;
+    };
     struct PsuedostateKind {
         struct initial;
         struct fork;

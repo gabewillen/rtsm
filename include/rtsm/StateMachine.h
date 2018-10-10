@@ -11,6 +11,7 @@
 #include "Transition.h"
 #include "State.h"
 #include "Psuedostate.h"
+#include "FinalState.h"
 #include <type_traits>
 
 namespace rtsm {
@@ -166,8 +167,11 @@ namespace rtsm {
         }
 
 
+        bool active() {
+            return region.active();
+        }
 
-//        using BaseObject::process;
+        using BaseObject::active;
         using BaseObject::execute;
 
         RegionObject region;

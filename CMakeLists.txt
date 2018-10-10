@@ -125,7 +125,6 @@ foreach (_SOURCE ${PROJECT_EXAMPLES_CPPS})
     #    assign_source_group(${_SOURCE})
 endforeach ()
 
-add_subdirectory(doc)
 ##################################################  Installation  ##################################################
 install(TARGETS ${PROJECT_NAME} EXPORT ${PROJECT_NAME}-config)
 install(DIRECTORY include/ DESTINATION include)

@@ -17,39 +17,8 @@ namespace rtsm {
         typedef uml::Type<CompletionTransition, uml::Transition> type;
     };
 
-//    namespace transition_details {
-//
-//        template<class TRANSITION, class EVENT, class TRIGGER>
-//        struct is_enabled<TRANSITION, EVENT, TRIGGER> {
-//            typedef typename std::remove_reference<EVENT>::type Event;
-//            static const bool value = std::is_base_of<typename TRIGGER::event, Event>::value ||
-//                                      std::is_same<typename TRIGGER::event, Event>::value;
-//        };
-//
-//        template<class TRANSITION, class EVENT>
-//        struct is_enabled<TRANSITION, EVENT, void> : std::is_base_of<Psuedostate, typename TRANSITION::source> {
-//        };
-//
-//        template<class TRANSITION>
-//        struct is_enabled<TRANSITION> : std::true_type {
-//        };
-//
-//        template<class TRANSITION, class EVENT>
-//        struct is_enabled<TRANSITION, EVENT>
-//                : is_enabled<TRANSITION, EVENT, typename TRANSITION::trigger> {
-//
-//        };
-//    }
 
-
-    struct Transition : uml::Transition {
-
-
-//        template<class ...REST>
-//                using is_enabled = transition_details::is_enabled<REST...>;
-
-
-    };
+    struct Transition : uml::Transition {};
 
     template<class ...>
     struct transition;
@@ -91,12 +60,6 @@ namespace rtsm {
         };
 
     };
-
-//    template<class ITEM,  class ...ARGS>
-//    struct transition<uml::Collection::type, uml::collection<ITEM>, ARGS...> : uml::collection<transition<ITEM, ARGS...>> {
-//
-//    };
-
 
 
     template<class ITEM, class ...ITEMS, class ...ARGS>
@@ -188,7 +151,7 @@ namespace rtsm {
 
 
         template<class CONTEXT, class KIND, class PSUEDOSTATE, class _CONTAINER, class ...ARGS>
-        void enter(CONTEXT &object, Object<uml::Psuedostate::type, KIND, PSUEDOSTATE, _CONTAINER> &current,
+        static void enter(CONTEXT &object, Object<uml::Psuedostate::type, KIND, PSUEDOSTATE, _CONTAINER> &current,
                    ARGS &&...args) {
             current.enter(object, std::forward<ARGS>(args)...);
         }
@@ -199,7 +162,7 @@ namespace rtsm {
                 bool IS_SAME = std::is_same<TARGET, STATE>::value,
                 typename std::enable_if<IS_SAME && !IS_DESCENDANT && !STATE::isSubmachineState, bool>::type= 0
         >
-        void enter(CONTEXT &object, Object<uml::State::type, STATE, _CONTAINER> &current,
+        static void enter(CONTEXT &object, Object<uml::State::type, STATE, _CONTAINER> &current,
                    ARGS &&...args) {
             current.entry(object);
             current.region.activate(object);
@@ -209,7 +172,7 @@ namespace rtsm {
                  class TARGET=typename CLASSIFIER::target,
                 typename std::enable_if<STATE::isSubmachineState, bool>::type= 0
         >
-        void enter(CONTEXT &object, Object<uml::State::type, STATE, _CONTAINER> &current,
+        static void enter(CONTEXT &object, Object<uml::State::type, STATE, _CONTAINER> &current,
                    ARGS &&...args) {
             current.entry(object);
         }
@@ -220,7 +183,7 @@ namespace rtsm {
                 bool IS_SAME = std::is_same<TARGET, STATE>::value,
                 typename std::enable_if<!IS_SAME && IS_DESCENDANT && !STATE::isSubmachineState, bool>::type= 0
         >
-        void enter(CONTEXT &object, Object<uml::State::type, STATE, _CONTAINER> &current,
+        static void enter(CONTEXT &object, Object<uml::State::type, STATE, _CONTAINER> &current,
                    ARGS &&...args) {
             if (!current.active()) {
                 current.entry(object);
@@ -228,12 +191,19 @@ namespace rtsm {
             enter(object, current.region, std::forward<ARGS>(args)...);
         }
 
+        template<class CONTEXT, class STATE, class _CONTAINER, class ...ARGS, class TARGET=typename CLASSIFIER::target, bool IS_SAME = std::is_same<TARGET, STATE>::value,
+                typename std::enable_if<IS_SAME, bool>::type= 0
+        >
+        static void enter(CONTEXT &object, Object<uml::FinalState::type, STATE, _CONTAINER> &current, ARGS &&...args) {
+                exit(object, current.container, std::forward<ARGS>(args)...);
+        }
+
         template<class CONTEXT, class CURRENT, class ...REST, class ...ARGS,
                  class TARGET=typename CLASSIFIER::target,
                 bool IS_DESCENDANT = uml::Classifier::is_descendant<TARGET, CURRENT>::value,
                 bool IS_COLLECTION = (CURRENT::size() > 1),
                 typename std::enable_if<!IS_DESCENDANT && !IS_COLLECTION, bool>::type= 0>
-        void enter(CONTEXT &object, Object<Region::type, CURRENT, REST...> &current, ARGS &&...args) {
+        static void enter(CONTEXT &object, Object<Region::type, CURRENT, REST...> &current, ARGS &&...args) {
             if (!current.active()) {
                 current.activate(object);
             }
@@ -245,7 +215,7 @@ namespace rtsm {
                 bool IS_DESCENDANT = uml::Classifier::is_descendant<TARGET, CURRENT>::value,
                 bool IS_COLLECTION = (CURRENT::size() > 1),
                 typename std::enable_if<IS_DESCENDANT && !IS_COLLECTION, bool>::type= 0>
-        void enter(CONTEXT &object, Object<Region::type, CURRENT, REST...> &current, ARGS &&...args) {
+        static void enter(CONTEXT &object, Object<Region::type, CURRENT, REST...> &current, ARGS &&...args) {
             current.active(true);
             enter(object, current.subvertex, std::forward<ARGS>(args)...);
         }
@@ -254,8 +224,7 @@ namespace rtsm {
         template<class CONTEXT, class ITEM1, class ITEM2, class ...ITEMS, class ...REST, class ...ARGS,
                  class TARGET=typename CLASSIFIER::target,
                  class CURRENT=Object<typename ITEM1::type, ITEM1, REST...>>
-        void
-        enter(CONTEXT &object, Object<Region::type, uml::collection<ITEM1, ITEM2, ITEMS...>, REST...> &current,
+        static void enter(CONTEXT &object, Object<Region::type, uml::collection<ITEM1, ITEM2, ITEMS...>, REST...> &current,
               ARGS &&...args) {
             enter(object, static_cast<CURRENT &>(current), std::forward<ARGS>(args)...);
             enter(object, current.next, std::forward<ARGS>(args)...);
@@ -265,8 +234,7 @@ namespace rtsm {
                  class TARGET=typename CLASSIFIER::target,
                  class CURRENT=Object<typename ITEM1::type, ITEM1, REST...>
         >
-        void
-        enter(CONTEXT &object, Object<uml::Vertex::type, uml::collection<ITEM1>, REST...> &current,
+        static void enter(CONTEXT &object, Object<uml::Vertex::type, uml::collection<ITEM1>, REST...> &current,
               ARGS &&...args) {
             enter(object, static_cast<CURRENT &>(current), std::forward<ARGS>(args)...);
         }
@@ -279,8 +247,7 @@ namespace rtsm {
                 bool IS_SAME = std::is_same<TARGET, ITEM1>::value,
                 typename std::enable_if<IS_SAME || IS_DESCENDANT, bool>::type= 0
         >
-        void
-        enter(CONTEXT &object, Object<uml::Vertex::type, uml::collection<ITEM1, ITEM2, ITEMS...>, REST...> &current,
+        static void enter(CONTEXT &object, Object<uml::Vertex::type, uml::collection<ITEM1, ITEM2, ITEMS...>, REST...> &current,
               ARGS &&...args) {
             enter(object, static_cast<CURRENT &>(current), std::forward<ARGS>(args)...);
         }
@@ -292,15 +259,14 @@ namespace rtsm {
                 bool IS_SAME = std::is_same<TARGET, ITEM1>::value,
                 typename std::enable_if<!IS_SAME && !IS_DESCENDANT, bool>::type= 0
         >
-        void
-        enter(CONTEXT &object, Object<uml::Vertex::type, uml::collection<ITEM1, ITEM2, ITEMS...>, REST...> &current,
+        static void enter(CONTEXT &object, Object<uml::Vertex::type, uml::collection<ITEM1, ITEM2, ITEMS...>, REST...> &current,
               ARGS &&...args) {
             enter(object, current.next, std::forward<ARGS>(args)...);
         }
 
 
         template<class CONTEXT, class STATE, class _CONTAINER, class ...ARGS>
-        void exit(CONTEXT &object, Object<uml::State::type, STATE, _CONTAINER> &current, ARGS &&...args) {
+        static void exit(CONTEXT &object, Object<uml::State::type, STATE, _CONTAINER> &current, ARGS &&...args) {
             if (current.active()) {
                 exit(object, current.region, std::forward<ARGS>(args)...);
                 current.exit(object);
@@ -308,23 +274,25 @@ namespace rtsm {
         }
 
         template<class CONTEXT, class ...REST, class ...ARGS>
-        void exit(CONTEXT &object, Object<Region::type, void, REST...> &current, ARGS &&...args) {
+        static void exit(CONTEXT &object, Object<Region::type, void, REST...> &current, ARGS &&...args) {
         }
 
         template<class CONTEXT, class REGION, class ...REST, class ...ARGS>
-        void exit(CONTEXT &object, Object<Region::type, REGION, REST...> &current, ARGS &&...args) {
+        static void exit(CONTEXT &object, Object<Region::type, REGION, REST...> &current, ARGS &&...args) {
             if (current.active()) {
                 exit(object, current.subvertex, std::forward<ARGS>(args)...);
                 current.active(false);
             }
         }
 
+        template<class CONTEXT,  class STATE, class _CONTAINER, class ...ARGS>
+        static void exit(CONTEXT &object, Object<uml::FinalState::type, STATE, _CONTAINER> &current, ARGS &&...args) {}
+
         template<class CONTEXT, class KIND, class PSUEDOSTATE, class _CONTAINER, class ...ARGS>
-        void
-        exit(CONTEXT &object, Object<uml::Psuedostate::type, KIND, PSUEDOSTATE, _CONTAINER> &current, ARGS &&...args) {}
+        static void exit(CONTEXT &object, Object<uml::Psuedostate::type, KIND, PSUEDOSTATE, _CONTAINER> &current, ARGS &&...args) {}
 
         template<class CONTEXT, class ITEM, class ...REST, class ...ARGS>
-        void exit(CONTEXT &object, Object<Region::type, collection<ITEM>, REST...
+        static void exit(CONTEXT &object, Object<Region::type, collection<ITEM>, REST...
 
         > &current,
                   ARGS &&...args
@@ -333,8 +301,7 @@ namespace rtsm {
         }
 
         template<class CONTEXT,  class ITEM, class ...ITEMS, class ...REST, class ...ARGS>
-        void
-        exit(CONTEXT &object, Object<Region::type, collection<ITEM, ITEMS...>, REST...
+        static void exit(CONTEXT &object, Object<Region::type, collection<ITEM, ITEMS...>, REST...
 
         > &current,
              ARGS &&...args
@@ -344,7 +311,7 @@ namespace rtsm {
         }
 
         template<class CONTEXT, class ITEM, class ...REST, class ...ARGS>
-        void exit(CONTEXT &object, Object<Vertex::type, collection<ITEM>, REST...
+        static void exit(CONTEXT &object, Object<Vertex::type, collection<ITEM>, REST...
 
         > &current,
                   ARGS &&...args
@@ -353,8 +320,7 @@ namespace rtsm {
         }
 
         template<class CONTEXT,  class ITEM, class ...ITEMS, class ...REST, class ...ARGS>
-        void
-        exit(CONTEXT &object, Object<Vertex::type, collection<ITEM, ITEMS...>, REST...
+        static void exit(CONTEXT &object, Object<Vertex::type, collection<ITEM, ITEMS...>, REST...
 
         > &current,
              ARGS &&...args
@@ -367,21 +333,18 @@ namespace rtsm {
 
 
         template<class LCA, class CONTEXT, class KIND, class PSUEDOSTATE, class _CONTAINER, class ...ARGS, typename std::enable_if<std::is_same<_CONTAINER, LCA>::value, bool>::type= 0>
-        LCA &
-        exit(CONTEXT &object, Object<uml::Psuedostate::type, KIND, PSUEDOSTATE, _CONTAINER> &current, ARGS &&...args) {
+        static LCA &exit(CONTEXT &object, Object<uml::Psuedostate::type, KIND, PSUEDOSTATE, _CONTAINER> &current, ARGS &&...args) {
             return current.container;
         }
 
         template<class LCA, class CONTEXT, class STATE, class _CONTAINER, class ...ARGS, typename std::enable_if<std::is_same<_CONTAINER, LCA>::value, bool>::type= 0>
-        LCA &
-        exit(CONTEXT &object, Object<uml::State::type, STATE, _CONTAINER> &current, ARGS &&...args) {
+        static LCA &exit(CONTEXT &object, Object<uml::State::type, STATE, _CONTAINER> &current, ARGS &&...args) {
             exit(object, current, std::forward<ARGS>(args)...);
             return current.container;
         }
 
         template<class LCA, class CONTEXT, class STATE, class _CONTAINER, class ...ARGS, typename std::enable_if<!std::is_same<_CONTAINER, LCA>::value, bool>::type= 0>
-        LCA &
-        exit(CONTEXT &object, Object<uml::State::type, STATE, _CONTAINER> &current, ARGS &&...args) {
+        static LCA &exit(CONTEXT &object, Object<uml::State::type, STATE, _CONTAINER> &current, ARGS &&...args) {
             exit(object, current, std::forward<ARGS>(args)...);
             return exit<LCA>(object, current.container.state, std::forward<ARGS>(args)...);
         }

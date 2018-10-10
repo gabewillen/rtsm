@@ -94,6 +94,9 @@ struct LocalEvent : rtsm::Event {
 struct IllegalEvent : rtsm::Event {
 
 };
+struct FinalEvent : rtsm::Event {
+
+};
 struct TestSM : rtsm::StateMachine<TestSM> {
 
 
@@ -152,16 +155,19 @@ struct TestSM : rtsm::StateMachine<TestSM> {
     };
     using Initial = rtsm::initial<A1::B1>;
 
+    struct FinalState: rtsm::FinalState {};
+
     using MultiTriggerTransition = rtsm::transition<rtsm::collection<Event1, Event2>, A1, A2>;
     using SelfTransition = rtsm::transition<SelfEvent, A1, A1>;
     using LocalTransition1 = rtsm::transition<LocalEvent, A1, A1::B2>;
     using ExternalTransition0 = rtsm::transition<ExternalEvent, A1::B2, A1::B1>;
     using ExternalTransition1 = rtsm::transition<ExternalEvent, A1::B1, A4>;
     using ExternalTransition2 = rtsm::transition<ExternalEvent, A4, A1::B1>;
+    using FinalTransition = rtsm::transition<FinalEvent, A2, FinalState>;
     using IllegalTransition  = rtsm::transition<IllegalEvent, A1::B1, A1::S4>;
     struct region : rtsm::Region {
-        using subvertex = rtsm::collection<Initial, A1, A2, A3, A4>;
-        using transition = rtsm::collection<MultiTriggerTransition, LocalTransition1, SelfTransition, ExternalTransition0, ExternalTransition1, ExternalTransition2, IllegalTransition>;
+        using subvertex = rtsm::collection<Initial, A1, A2, A3, A4, FinalState>;
+        using transition = rtsm::collection<MultiTriggerTransition, LocalTransition1, SelfTransition, ExternalTransition0, ExternalTransition1, ExternalTransition2, IllegalTransition, FinalTransition>;
 
     };
 };
@@ -206,13 +212,24 @@ TEST_SUITE ("transitions") {
                                     sm.dispatch(Event2());
                                     REQUIRE(test::path.evaluate("TestSM::A1::B1::exit","TestSM::A1::B3::exit", "TestSM::A1::exit", "TestSM::A2::entry"));
                                     test::path.clear();
+                                    SUBCASE("FinalEvent transition") {
+                                        sm.dispatch(FinalEvent());
+                                        test::path.dump();
+                                        REQUIRE(!sm.active());
+                                    }
                                 }
                             }
                         }
-                        SUBCASE("illegal transition from one Region to another in the same immediate enclosing composite") {
-                            sm.dispatch(IllegalEvent());
-                        }
+//                        SUBCASE("illegal transition from one Region to another in the same immediate enclosing composite") {
+//                            sm.dispatch(IllegalEvent());
+//                        }
                     }
+//                    SUBCASE("ascending transition") {
+//                        sm.dispatch(AscendingEvent());
+//                        test::path.dump();
+//                        REQUIRE(test::path.evaluate("TestSM::A1::B1::exit"));
+//
+//                    }
                 }
             }
         }

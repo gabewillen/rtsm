@@ -198,7 +198,7 @@ namespace rtsm {
     };
 
     template<class CONTAINER>
-    struct Object<uml::State::type, void, CONTAINER> {
+    struct Object<uml::State::type, void, CONTAINER> : Object<uml::Element::type, void> {
     };
 
 }
