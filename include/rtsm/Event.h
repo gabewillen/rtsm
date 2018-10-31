@@ -12,14 +12,10 @@ namespace rtsm {
 
 
     struct Event : uml::Event {
-
+        static const int id = 0;
 
     };
-
-//    template<int ID>
-//    struct UIDEvent : Event {
-//        static const int id = ID;
-//    };
+    
 
     template<int ID, class EVENT=Event>
     struct event : EVENT {
@@ -48,12 +44,23 @@ namespace rtsm {
         template<class TRANSITION, class ...TRIGGERS>
         struct is_same<TRANSITION, uml::collection<TRIGGERS...>> {
 
+            template<class ...>
+                    struct _is_same;
+
+            template<class EVENT, class ...EVENTS, class _CLASSIFIER>
+                    struct _is_same<uml::collection<EVENT, EVENTS...>, _CLASSIFIER> {
+                        static const bool value = std::is_same<EVENT, _CLASSIFIER>::value || _is_same<uml::collection<EVENTS...>, _CLASSIFIER>::value;
+                    };
+
+            template<class EVENT, class _CLASSIFIER>
+                    struct _is_same<EVENT, _CLASSIFIER> : std::is_same<EVENT, _CLASSIFIER> {};
+
             template<class TRIGGER>
-            struct _is_same : std::is_same<typename TRIGGER::event, CLASSIFIER> {
+            struct _is_same<TRIGGER> : _is_same<typename TRIGGER::event, CLASSIFIER> {
             };
             typedef typename uml::Collection::select<uml::collection<TRIGGERS...>, _is_same>::type events;
 
-            static const bool value = events::size() == 1;
+            static const bool value = events::size() >= 1;
         };
 
         template<class TRANSITION>

@@ -10,7 +10,7 @@
 #include <atomic>
 
 #endif
-
+#include <iostream>
 #include <cstring>
 #include "Collection.h"
 #include "Classifier.h"
@@ -125,11 +125,12 @@ namespace rtsm {
                 this->template dispatch<EVENT, IS_SAME, POOL, uml::Collection::index_of<POOL, EVENT, INDEX + 1>::value>(event);
                 return;
             }
-            bool processing = this->processing > 0;
-            memcpy(static_cast<void *>(&static_cast<EVENT &>(object)), static_cast<void *>(&event), sizeof(EVENT));
+            bool isProcessing = this->processing > 0;
+            static_cast<EVENT &>(object) = event;
+//            memcpy(static_cast<void *>(&static_cast<EVENT &>(object)), static_cast<void *>(&event), sizeof(EVENT));
             object.active(true);
             this->processing++;
-            while (!processing && this->processing > 0) {
+            while (!isProcessing && this->processing > 0) {
                 this->process();
             }
         }
@@ -262,23 +263,26 @@ namespace rtsm {
                     event.active(false);
                     return true;
                 }
+                event.active(false);
             }
             return false;
         }
 
 
         template<class EVENT>
-        inline void process(Object<uml::Event::type, uml::collection<EVENT>, DerivedObject>
+        inline bool process(Object<uml::Event::type, uml::collection<EVENT>, DerivedObject>
                             &object) {
-            process(static_cast<Object<typename EVENT::type, EVENT, DerivedObject> &>(object));
+            return process(static_cast<Object<typename EVENT::type, EVENT, DerivedObject> &>(object));
         }
 
 
         template<class EVENT, class ...EVENTS>
-        inline void process(Object<uml::Event::type, uml::collection<EVENT, EVENTS...>, DerivedObject>
+        inline bool process(Object<uml::Event::type, uml::collection<EVENT, EVENTS...>, DerivedObject>
                             &object) {
-            process(static_cast<Object<typename EVENT::type, EVENT, DerivedObject> &>(object));
-            process(object.next);
+            if (!process(static_cast<Object<typename EVENT::type, EVENT, DerivedObject> &>(object))) {
+                return process(object.next);
+            }
+            return true;
         }
 
 

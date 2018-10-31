@@ -18,7 +18,20 @@ namespace rtsm {
     };
 
 
-    struct Transition : uml::Transition {};
+    struct Transition : uml::Transition {
+
+//        template<class ...ARGS>
+//        using is_enabled = is_enabled<ARGS...>;
+    };
+
+    namespace {
+
+        template<class ...>
+        struct is_enabled;
+//
+//        template<class TRANSITION>
+//        struct is_enabled<TRANSITION> : std::conditional<TRANSITION::id > 0, std::integral_value<int, 0>,,
+    }
 
     template<class ...>
     struct transition;

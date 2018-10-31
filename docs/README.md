@@ -1,22 +1,23 @@
-# Aviator
+# Edition
 
-API documentation template for Jekyll. Browse through a [live demo](https://tangerine-lemon.cloudvent.net/).
-Start documenting your API with this configurable theme.
+Product documentation template for Jekyll. Browse through a [live demo](https://long-pig.cloudvent.net/).
+Start documenting your product, application, service or website with this configurable theme.
 
-![Aviator template screenshot](images/_screenshot.png)
+![Edition template screenshot](images/_screenshot.png)
 
-Aviator was made by [CloudCannon](http://cloudcannon.com/), the Cloud CMS for Jekyll.
+Edition was made by [CloudCannon](http://cloudcannon.com/), the Cloud CMS for Jekyll.
 
 Find more templates, themes and step-by-step Jekyll tutorials at [CloudCannon Academy](https://learn.cloudcannon.com/).
 
 ## Features
 
-* Three column layout
-* Fully responsive
+* Two column layout
 * Full text search
 * Pre-styled components
 * Auto-generated navigation based on category
 * Optimised for editing in [CloudCannon](http://cloudcannon.com/)
+* Change log
+* RSS/Atom feed
 * SEO tags
 * Google Analytics
 
@@ -27,7 +28,7 @@ Find more templates, themes and step-by-step Jekyll tutorials at [CloudCannon Ac
 
 ## Develop
 
-Aviator was built with [Jekyll](http://jekyllrb.com/) version 3.7.2, but should support newer versions as well.
+Edition was built with [Jekyll](http://jekyllrb.com/) version 3.3.1, but should support newer versions as well.
 
 Install the dependencies with [Bundler](http://bundler.io/):
 
@@ -43,14 +44,23 @@ $ bundle exec jekyll serve
 
 ## Editing
 
-Aviator is already optimised for adding, updating and removing documentation pages in CloudCannon.
+Edition is already optimised for adding, updating and removing documentation pages in CloudCannon.
 
-### Usage
+### Documentation pages
 
-* Each section is a different collection, this helps organise your content.
-* Set the order of the collections with the position field in collection configuration in `_config.yml`.
-* Set the order of the documents inside a collection by setting the position in front matter.
+* Add, update or remove a documentation page in the *Documentation* collection.
+* Change the category of a documentation page to move it to another section in the navigation.
+* Documentation pages are organised in the navigation by category, with URLs based on the path inside the `_docs` folder.
+
+### Change log
+
+* Add, update or remove change log entries from your posts.
+* Tag entries as minor or major in the front matter.
 
 ### Search
 
 * Add `excluded_in_search: true` to any documentation page's front matter to exclude that page in the search results.
+
+### Navigation
+
+* Change `site.show_full_navigation` to control all or only the current navigation group being open.

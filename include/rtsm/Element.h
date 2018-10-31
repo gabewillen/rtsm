@@ -36,10 +36,10 @@ namespace rtsm {
 
 
         template<class ...ARGS, class _ELEMENT=ELEMENT, typename std::enable_if<std::is_default_constructible<_ELEMENT>::value, bool>::type= 0>
-        Object(ARGS &&...args) : _active(false) {}
+        Object(ARGS &&...args) : _active(0) {}
 
         template<class ...ARGS, class _ELEMENT=ELEMENT, typename std::enable_if<!std::is_default_constructible<_ELEMENT>::value, bool>::type= 0>
-        Object(ARGS &&...args) : ELEMENT(std::forward<ARGS>(args)...), _active(false) {}
+        Object(ARGS &&...args) : ELEMENT(std::forward<ARGS>(args)...), _active(0) {}
 
         template<class TARGET,
                 bool IS_SAME = std::is_same<ELEMENT, TARGET>::value,
@@ -55,19 +55,27 @@ namespace rtsm {
         }
 
         bool active() {
-            return _active;
+            return _active > 0;
         }
 
         void active(bool value) {
-            _active = value;
+            if(value) {
+                _active++;
+            } else if(_active) {
+                _active--;
+            }
+//            _active = static_cast<unsigned int>(value);
         }
 
+        const unsigned int &refs() {
+            return _active;
+        }
     private:
 
     #if !(__arm__ || NON_CONCURRENT_REGIONS)
-        std::atomic_bool _active;
+        std::atomic<unsigned int> _active;
     #else
-        bool _active;
+        unsigned int _active;
     #endif
     };
 

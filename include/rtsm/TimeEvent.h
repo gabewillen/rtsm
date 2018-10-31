@@ -84,6 +84,7 @@ namespace rtsm {
 
         typedef UNIT<DURATION, VALUE> when;
 
+        clock::duration elapsed = clock::duration::zero();
 //    protected:
 //
 //        template<class _DURATION>
@@ -99,6 +100,7 @@ namespace rtsm {
 
 
         typedef typename duration_add<UNIT1<DURATION1, VALUE1>, UNIT2<DURATION2, VALUE2>, UNITS...>::type when;
+        clock::duration elapsed;
 
     };
 
@@ -117,7 +119,7 @@ namespace rtsm {
         typedef Object<uml::Duration::type, typename CLASSIFIER::when> WhenObject;
 
         template<class SOURCE=typename BaseObject::SourceObject>
-        Object(CONTEXT &object): BaseObject(object), start(), elapsed(0) {}
+        Object(CONTEXT &object): BaseObject(object), start() {}
 
 
         bool active() {
@@ -126,8 +128,8 @@ namespace rtsm {
                     BaseObject::active(true);
                     reset();
                 } else {
-                    elapsed = clock::now() - start;
-                    if (elapsed >= std::chrono::duration_cast<clock::duration>(when)) {
+                    this->elapsed = clock::now() - start;
+                    if (this->elapsed >= std::chrono::duration_cast<clock::duration>(when)) {
                         return true;
                     }
                 }
@@ -143,10 +145,9 @@ namespace rtsm {
     private:
         WhenObject when;
         clock::time_point start;
-        clock::duration elapsed;
 
         inline void reset() {
-            elapsed = clock::duration(0);
+            this->elapsed = clock::duration(0);
             start = clock::now();
         }
 

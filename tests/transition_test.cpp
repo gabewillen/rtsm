@@ -1,10 +1,10 @@
-//#define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 
 
 #include <rtsm/StateMachine.h>
 #include <rtsm/log.h>
 #include <iostream>
 #include <sstream>
+#include <unistd.h>
 #include "doctest/doctest.h"
 #include <vector>
 
@@ -97,6 +97,12 @@ struct IllegalEvent : rtsm::Event {
 struct FinalEvent : rtsm::Event {
 
 };
+
+struct TickEvent : rtsm::TimeEvent<rtsm::seconds<1>> {};
+
+
+#define SEC2US(SEC) SEC * 1000000
+#define MIL2US(MIL) MIL * 1000
 struct TestSM : rtsm::StateMachine<TestSM> {
 
 
@@ -165,9 +171,16 @@ struct TestSM : rtsm::StateMachine<TestSM> {
     using ExternalTransition2 = rtsm::transition<ExternalEvent, A4, A1::B1>;
     using FinalTransition = rtsm::transition<FinalEvent, A2, FinalState>;
     using IllegalTransition  = rtsm::transition<IllegalEvent, A1::B1, A1::S4>;
+    struct TickTransition : rtsm::transition<TickEvent, A1::B3> {
+        struct effect : rtsm::Behavior {
+            void execute(TestSM &self, TickEvent &event) {
+                std::cout << event.elapsed.count() / 1000000 << std::endl;
+            }
+        };
+    };
     struct region : rtsm::Region {
         using subvertex = rtsm::collection<Initial, A1, A2, A3, A4, FinalState>;
-        using transition = rtsm::collection<MultiTriggerTransition, LocalTransition1, SelfTransition, ExternalTransition0, ExternalTransition1, ExternalTransition2, IllegalTransition, FinalTransition>;
+        using transition = rtsm::collection<MultiTriggerTransition, LocalTransition1, SelfTransition, ExternalTransition0, ExternalTransition1, ExternalTransition2, IllegalTransition, FinalTransition, TickTransition>;
 
     };
 };
@@ -212,6 +225,7 @@ TEST_SUITE ("transitions") {
                                     sm.dispatch(Event2());
                                     REQUIRE(test::path.evaluate("TestSM::A1::B1::exit","TestSM::A1::B3::exit", "TestSM::A1::exit", "TestSM::A2::entry"));
                                     test::path.clear();
+
                                     SUBCASE("FinalEvent transition") {
                                         sm.dispatch(FinalEvent());
                                         test::path.dump();

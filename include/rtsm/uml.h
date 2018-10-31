@@ -190,7 +190,7 @@ namespace uml {
         struct classifier;
 
         template<class ...ITEMS, std::size_t INDEX>
-        struct classifier<collection<ITEMS...>, INDEX> : std::tuple_element<INDEX, std::tuple<ITEMS...>> {
+        struct classifier<collection<ITEMS...>, INDEX> : std::tuple_element<INDEX, std::tuple < ITEMS...>> {
         };
 
         template<std::size_t INDEX>
@@ -253,7 +253,7 @@ namespace uml {
     template<class ITEM>
     struct collection<ITEM> : Collection, std::tuple<ITEM> {
         using Collection::type;
-        typedef std::tuple<ITEM> classifiers;
+        typedef std::tuple <ITEM> classifiers;
 
         static constexpr std::size_t size() {
             return 1;
@@ -339,14 +339,13 @@ namespace uml {
 
 
         template<class ...>
-                struct LCAState;
+        struct LCAState;
 
         template<class CLASSIFIER, class SOURCE, class TARGET>
-                struct LCAState<CLASSIFIER, SOURCE, TARGET> {
+        struct LCAState<CLASSIFIER, SOURCE, TARGET> {
 
-                    typedef typename lca<CLASSIFIER, SOURCE, TARGET>::type LCA;
-                };
-
+            typedef typename lca<CLASSIFIER, SOURCE, TARGET>::type LCA;
+        };
 
 
         typedef void region;
@@ -621,11 +620,13 @@ namespace uml {
         };
 
         template<class TRANSITION, class EVENT>
-                struct transition_is_enabled<TRANSITION, EVENT, collection<>> : std::false_type {};
+        struct transition_is_enabled<TRANSITION, EVENT, collection<>> : std::false_type {
+        };
 
         template<class TRANSITION, class EVENT, class TRIGGER, class ...TRIGGERS>
         struct transition_is_enabled<TRANSITION, EVENT, collection<TRIGGER, TRIGGERS...>> {
-            static const bool value = transition_is_enabled<TRANSITION, EVENT, TRIGGER>::value || transition_is_enabled<TRANSITION, EVENT, collection<TRIGGERS...>>::value;
+            static const bool value = transition_is_enabled<TRANSITION, EVENT, TRIGGER>::value ||
+                                      transition_is_enabled<TRANSITION, EVENT, collection<TRIGGERS...>>::value;
         };
 
         template<class TRANSITION, class EVENT>
@@ -726,10 +727,18 @@ namespace uml {
             typedef collection<> type;
         };
 
-        template<class TRANSITION, class TRIGGER>
-        struct event_all<Transition::type, TRANSITION, TRIGGER> {
-            typedef collection<typename TRIGGER::event> type;
+        template<class EVENT>
+        struct event_all<Event::type, EVENT> {
+            typedef collection<EVENT> type;
         };
+
+        template<class ...EVENTS>
+        struct event_all<Event::type, collection<EVENTS...>> {
+            typedef collection<EVENTS...> type;
+        };
+
+        template<class TRANSITION, class TRIGGER>
+        struct event_all<Transition::type, TRANSITION, TRIGGER> : event_all<Event::type, typename TRIGGER::event> {};
 
         template<class TRANSITION>
         struct event_all<Transition::type, TRANSITION, collection<>> {

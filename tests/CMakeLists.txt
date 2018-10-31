@@ -1,0 +1,6 @@
+find_package(Threads)
+SET(CMAKE_CXX_FLAGS_DEBUG "-g3 -O0")
+add_executable(transition_tests doctest/main.cpp transition_test.cpp)
+target_compile_options(transition_tests PRIVATE -g3 -O0)
+target_link_libraries(transition_tests rtsm ${CMAKE_THREAD_LIBS_INIT})
+#target_include_directories(transition_tests PRIVATE ./)

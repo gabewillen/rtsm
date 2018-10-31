@@ -5,10 +5,14 @@
 #ifndef RTSM_PORT_H
 #define RTSM_PORT_H
 
-#include "Object.h"
+#include "Property.h"
 
 namespace rtsm {
 
+
+    struct Port : Property, uml::Port {
+
+    };
 
 }
 
