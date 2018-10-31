@@ -15,7 +15,7 @@ namespace rtsm {
         static const int id = 0;
 
     };
-    
+
 
     template<int ID, class EVENT=Event>
     struct event : EVENT {
