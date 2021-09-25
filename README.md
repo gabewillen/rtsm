@@ -1,5 +1,5 @@
 # DISCLAIMER
-This is highly experimental and ambandoned. It's here for historical purporses. Use at your own risk. This was re-written and used interanally closed source for my current employer.
+This is highly experimental and ambandoned. It's here for historical purporses. Use at your own risk. This was re-written and used internally closed source for my current employer.
 
 ## Synopsis
 
